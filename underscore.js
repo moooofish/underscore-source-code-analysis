@@ -163,7 +163,7 @@
   var optimizeCb = function(func, context, argCount) {
     /* 
       绝大多数情况下，不传 context, 直接返回原原本本传入的函数。
-      不会走下面的 switch 逻辑
+      不会走下面的 switch 流控制语句
 
     */
     if (context === void 0) return func;
@@ -171,20 +171,44 @@
       当 context 不为 undefined 时
     */
     switch (argCount == null ? 3 : argCount) {
+      /* 
+        用在 _.times 方法中
+        _.times = function(n, iteratee, context) {
+          var accum = Array(Math.max(0, n));
+          iteratee = optimizeCb(iteratee, context, 1);
+          for (var i = 0; i < n; i++) accum[i] = iteratee(i);
+          return accum;
+        };
+        只有传入的第一个参数有用
+      */
       case 1:
         return function(value) {
           return func.call(context, value);
         };
       // The 2-argument case is omitted because we’re not using it.
+
+      /* 
+        一般都是这种情况，像 map、filter等等
+      
+      */
       case 3:
         return function(value, index, collection) {
           return func.call(context, value, index, collection);
         };
+      /* 
+        
+          用在 reduce 方法里
+        */
       case 4:
         return function(accumulator, value, index, collection) {
           return func.call(context, accumulator, value, index, collection);
         };
     }
+    /* 
+    
+      只单纯改变执行上下文
+    
+    */
     return function() {
       return func.apply(context, arguments);
     };
@@ -203,7 +227,7 @@
     */
     if (value == null) return _.identity;
     /* 
-      通常情况下
+      通常情况下，如果是函数类型，丢给 optimizeCb 处理
     */
     if (_.isFunction(value)) return optimizeCb(value, context, argCount);
     /* 
@@ -211,7 +235,24 @@
     */
     if (_.isObject(value) && !_.isArray(value)) return _.matcher(value);
     /* 
+      如果传入的是字符串或数组
       返回对象的属性值
+
+      我用 lodash 的 get 举例子
+      const employee = {
+        name: 'qin',
+        gender: 'meal',
+        address: {
+          province: 'hubei',
+          city: 'wuhan'
+        }
+      };
+
+      get(obj, 'address.city'); // 'wuhan'
+
+      get(obj, ['address', 'city']); // 'wuhan'
+
+
     */
     return _.property(value);
   };
@@ -233,8 +274,14 @@
       func.length 即为函数参数的个数
     */
     startIndex = startIndex == null ? func.length - 1 : +startIndex;
+    /* 
+      返回一个函数
+    */
     return function() {
       var length = Math.max(arguments.length - startIndex, 0),
+      /* 
+        剩余参数组成一个数组
+      */
         rest = Array(length),
         index = 0;
       for (; index < length; index++) {
@@ -248,6 +295,7 @@
         case 2:
           return func.call(this, arguments[0], arguments[1], rest);
       }
+
       var args = Array(startIndex + 1);
       for (index = 0; index < startIndex; index++) {
         args[index] = arguments[index];
