@@ -1,5 +1,8 @@
 # underscore 源码分析
 
+希望通过分析 underscore 工具库源码，并写一些自己的想法和思考。
+若文中有多不妥之处，请指出，一起谈论，互相学习，共同进步。
+
 ## 《深入浅出 underscore.js》
 
 - [你不知道的 _ 调用方式](https://github.com/qinghuanI/underscore-source-code-analysis/issues/1)
