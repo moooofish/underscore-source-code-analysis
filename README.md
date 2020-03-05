@@ -11,7 +11,7 @@
 - [underscore.js 中的三大重要方法](https://github.com/qinghuanI/underscore-source-code-analysis/issues/6)
 - [柯里化与函数式编程](https://github.com/qinghuanI/underscore-source-code-analysis/issues/7)
 - [简谈常见库的模块化封装](https://github.com/qinghuanI/underscore-source-code-analysis/issues/8)
-
+- [JavaScript 精髓之原型对象](https://github.com/qinghuanI/underscore-source-code-analysis/issues/9)
 ## License
 
-[**The MIT License**](LICENSE).
+[**The MIT License**](LICENSE)
