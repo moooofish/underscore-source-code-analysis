@@ -7,6 +7,11 @@
 《深入浅出Underscore》由一系列 underscore.js 源码分析文章组成。
 从 JavaScript 基础与 underscore.js 工具库相结合，深入学习执行上下文、作用域、this 指向、流控制语句、原型、原型链、类与继承等理论知识。
 
+## Design philosophy
+
+```js
+f(data) => newData
+```
 
 ## 《深入浅出Underscore》
 

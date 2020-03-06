@@ -5,6 +5,8 @@
 
 /* 
 
+  Underscore.js 的作用: fn(data) => newData
+
   数组方法都可以通过 for 去实现
 
   集合 数组 对象 对 key-value 的数据结构操作
@@ -52,7 +54,10 @@
 
   // Save bytes in the minified (but not gzipped) version:
   /* 
-    将数组、对象和标志的原型对象存入变量
+    将数组、对象和 Symbol 的原型对象存入变量，用于下文使用:
+
+    var push = ArrayProto.push
+
   */
   var ArrayProto = Array.prototype,
     ObjProto = Object.prototype;
@@ -90,6 +95,8 @@
     另一种是面向对象式链式调用方式
     _(list).map(v => v);
   
+    最后一种
+    _chain(list).map(v => v)
   */
   var _ = function(obj) {
     /* 
@@ -112,9 +119,12 @@
   // (`nodeType` is checked to ensure that `module`
   // and `exports` are not HTML elements.)
   /* 
+    这是 UMD 规范。
+
     定义不同环境下的导出方式
-    1.commonjs
-    2.browser
+    1.CommonJS 规范
+    2.AMD 规范
+    3.直接暴露到全局
   */
   if (typeof exports != "undefined" && !exports.nodeType) {
     if (typeof module != "undefined" && !module.nodeType && module.exports) {
@@ -236,22 +246,11 @@
     if (_.isObject(value) && !_.isArray(value)) return _.matcher(value);
     /* 
       如果传入的是字符串或数组
-      返回对象的属性值
+      适用于对象数组
 
-      我用 lodash 的 get 举例子
-      const employee = {
-        name: 'qin',
-        gender: 'meal',
-        address: {
-          province: 'hubei',
-          city: 'wuhan'
-        }
-      };
+      const books = [{name: 'qin'}, {name: 'ee'}];
 
-      get(obj, 'address.city'); // 'wuhan'
-
-      get(obj, ['address', 'city']); // 'wuhan'
-
+      console.log(_.map(books, "name")); // ['qin', 'ee']
 
     */
     return _.property(value);
@@ -279,7 +278,7 @@
     */
     return function() {
       var length = Math.max(arguments.length - startIndex, 0),
-      /* 
+        /* 
         剩余参数组成一个数组
       */
         rest = Array(length),
@@ -317,6 +316,13 @@
 
   /* 
     利用闭包，返回获取对象某个属性值的函数
+
+    用于获取一层对象的属性值，
+    const person = { name: 'qin', age: 25 }
+
+
+
+
   */
   var shallowProperty = function(key) {
     return function(obj) {
@@ -332,7 +338,10 @@
   };
 
   /* 
-    path 为数组参数
+    deepGet 方法要求 path 参数为数组类型
+
+
+
   */
   var deepGet = function(obj, path) {
     var length = path.length;
@@ -350,9 +359,9 @@
   var MAX_ARRAY_INDEX = Math.pow(2, 53) - 1;
   var getLength = shallowProperty("length");
   /* 
-    类数组判断方法，存在 length 属性，
-    值为 number 类型，大于等于0， 小于
-    机器允许的最大数组索引
+    类数组判断条件:
+    1.存在 length 属性;
+    2.值为 number 类型，大于等于0， 小于机器允许的最大数组索引
 
     类数组:
     const arrayLike = {
@@ -389,11 +398,17 @@
     */
     iteratee = optimizeCb(iteratee, context);
     var i, length;
+    /*
+      处理类数组、数组的情况
+    */
     if (isArrayLike(obj)) {
       for (i = 0, length = obj.length; i < length; i++) {
         iteratee(obj[i], i, obj);
       }
     } else {
+      /*
+        处理对象的情况
+      */
       var keys = _.keys(obj);
       for (i = 0, length = keys.length; i < length; i++) {
         iteratee(obj[keys[i]], keys[i], obj);
@@ -411,6 +426,12 @@
 
   */
   _.map = _.collect = function(obj, iteratee, context) {
+    /*
+      map 方法首次用到了 cb 这个内部函数
+
+
+      
+    */
     iteratee = cb(iteratee, context);
     var keys = !isArrayLike(obj) && _.keys(obj),
       length = (keys || obj).length,
@@ -2030,6 +2051,28 @@
 
   // Creates a function that, when passed an object, will traverse that object’s
   // properties down the given `path`, specified as an array of keys or indexes.
+  /* 
+
+    获取对象的属性值
+    其实这个方法没有 lodash 中的 get 方法好。
+
+
+    在 underscore.js 中，我们只能这样使用 _.property 方法
+
+    const person = {
+      name: 'qin',
+      address: {
+        city: 'wuhan'
+      }
+    };
+
+
+    _.property(['address', 'city'])(person) // 'wuhan'
+    
+
+
+  
+  */
   _.property = function(path) {
     /* 
       path 不是数组，一般为字符串
