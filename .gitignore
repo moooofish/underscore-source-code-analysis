@@ -2,3 +2,4 @@ docs/
 a.js
 index.html
 .vscode
+.eslintignore
