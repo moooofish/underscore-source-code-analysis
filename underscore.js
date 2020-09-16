@@ -1545,6 +1545,7 @@
     if (nativeKeys) return nativeKeys(obj);
     /* 
       for in 和 Object.prototype.hasOwnProperty 集合获取对象的 key
+      Object.prototype.hasOwnProperty 用来获取实例上的属性
     */
     var keys = [];
     for (var key in obj) if (has(obj, key)) keys.push(key);
@@ -1555,7 +1556,7 @@
 
   // Retrieve all the property names of an object.
   /* 
-    for...in 可以遍历原型链上的属性
+    for...in 可以遍历原型链上的所有属性
   */
   _.allKeys = function (obj) {
     //
@@ -1608,7 +1609,11 @@
   // Convert an object into a list of `[key, value]` pairs.
   // The opposite of _.object.
   /* 
+    把一个对象转变为一个[key, value]形式的数组,其结果是一个二维数组
+
     _.pairs(obj) => [...[key, value]]
+
+    相当于原生 JS 里的 Object.entries 方法
   */
   _.pairs = function (obj) {
     var keys = _.keys(obj);
@@ -1622,7 +1627,7 @@
 
   // Invert the keys and values of an object. The values must be serializable.
   /* 
-    _.invert => {value: key}
+    _.invert({'name': 'qin', 'age': 26}); // { 'qin':'name', '26': 'age' }
     我认为此方法实用性不高，并且要求 value 唯一且能转为字符串
   */
   _.invert = function (obj) {
@@ -1638,7 +1643,8 @@
   // Return a sorted list of the function names available on the object.
   // Aliased as `methods`.
   /* 
-    其实就是普通对象的过滤
+    返回一个对象里所有的方法名, 而且是已经排序的
+
     _.functions = _.filterKey(obj, value => _.isFunction(value))
   */
   _.functions = _.methods = function (obj) {
@@ -1716,17 +1722,26 @@
 
   // Internal pick helper function to determine if `obj` has key `key`.
   /* 
-    in 操作符可以顺着原型链查找对象的某个属性是否存在
+    in 操作符可以顺着原型链查找对象的某个属性是否存在。
+    是一个内部方法
   */
   var keyInObj = function (value, key, obj) {
     return key in obj;
   };
 
   // Return a copy of the object only containing the whitelisted properties.
+  /* 
+
+    对对象的 key 进行过滤
+
+  */
   _.pick = restArguments(function (obj, keys) {
     var result = {},
       iteratee = keys[0];
     if (obj == null) return result;
+    /* 
+      可以是函数或者字符串
+    */
     if (_.isFunction(iteratee)) {
       if (keys.length > 1) iteratee = optimizeCb(iteratee, keys[1]);
       keys = _.allKeys(obj);
