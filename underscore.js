@@ -1802,6 +1802,9 @@
   // Invokes interceptor with the obj, and then returns obj.
   // The primary purpose of this method is to "tap into" a method chain, in
   // order to perform operations on intermediate results within the chain.
+  /* 
+    这不就是一个普通的回调函数吗？
+  */
   _.tap = function (obj, interceptor) {
     interceptor(obj);
     return obj;
@@ -1944,6 +1947,9 @@
   };
 
   // Perform a deep comparison to check if two objects are equal.
+  /* 
+    判断相等的方法很重要， 基本上所有的数据类型都可以判断
+  */
   _.isEqual = function (a, b) {
     return eq(a, b);
   };
@@ -1952,6 +1958,7 @@
   // An "empty" object has no enumerable own-properties.
   /* 
     空对象即为自己没有可遍历的对象
+    可以用来判断数组、对象、类数组、字符串为空
   */
   _.isEmpty = function (obj) {
     if (obj == null) return true;
@@ -1964,7 +1971,7 @@
   };
 
   // Is a given value a DOM element?
-  // 判断 DOM 元素对象
+  // 判断 DOM 元素对象， 实用性不高
   _.isElement = function (obj) {
     return !!(obj && obj.nodeType === 1);
   };
@@ -1983,6 +1990,7 @@
   // Is a given variable an object?
   /* 
     用来判断对象
+    这个对象可以是函数、也可以是普通对象
   */
   _.isObject = function (obj) {
     var type = typeof obj;
@@ -2043,7 +2051,10 @@
   };
 
   // Is the given value `NaN`?
-  // 判断传入的值是不是 NaN
+  /* 
+    判断传入的值是不是 NaN
+    相比于 Number.isNaN 方法，要求传入的参数必须是 Number 类型并且是 NaN 
+  */
   _.isNaN = function (obj) {
     return _.isNumber(obj) && isNaN(obj);
   };
@@ -2057,7 +2068,10 @@
   };
 
   // Is a given value equal to null?
-  // 判断传入的值是不是 null 类型
+  /* 
+    判断传入的值是不是 null 类型
+    使用 === 就可以做全等的计算
+  */
   _.isNull = function (obj) {
     return obj === null;
   };
@@ -2073,11 +2087,18 @@
   /* 
     根据传入的 path, 判断传入的对象上是否有值
     path 即可以是字符串或者数组
+
+    path 若为字符串，则只能传一个参数，判断对象一级属性
+    若为数组，则判断多级嵌套属性
   */
   _.has = function (obj, path) {
     if (!_.isArray(path)) {
       return has(obj, path);
     }
+
+    /* 
+      通过 for 循环往下找对象
+    */
     var length = path.length;
     for (var i = 0; i < length; i++) {
       var key = path[i];
@@ -2110,6 +2131,8 @@
   // Predicate-generating functions. Often useful outside of Underscore.
   /* 
     可以看作保存结果的常量函数
+
+    使用闭包缓存数据
   */
   _.constant = function (value) {
     return function () {
@@ -2117,7 +2140,11 @@
     };
   };
 
-  // 空函数
+  /* 
+    空函数
+    常用于 react/vue props 属性判断中
+  */
+
   _.noop = function () {};
 
   // Creates a function that, when passed an object, will traverse that object’s
@@ -2210,6 +2237,7 @@
   // A (possibly faster) way to get the current timestamp as an integer.
   /* 
     返回当前的时间，作用不大
+    +new Date() => 1600314116751
   */
   _.now =
     Date.now ||
