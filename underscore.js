@@ -23,6 +23,14 @@
   set 和 get => 过滤 迭代 添加 => 最终结果
 
 
+  方法分类:
+  1. 集合方法
+  2. 数组方法
+  3. 函数方法
+  4. 对象方法
+  5. 工具方法
+  6. 链式语法
+
 */
 /* 
   
@@ -50,6 +58,7 @@
     {};
 
   // Save the previous value of the `_` variable.
+  // 主要用在浏览器中
   var previousUnderscore = root._;
 
   // Save bytes in the minified (but not gzipped) version:
@@ -319,10 +328,6 @@
 
     用于获取一层对象的属性值，
     const person = { name: 'qin', age: 25 }
-
-
-
-
   */
   var shallowProperty = function (key) {
     return function (obj) {
@@ -339,9 +344,8 @@
 
   /* 
     deepGet 方法要求 path 参数为数组类型
-
-
-
+    
+    相比 lodash, 兼容性一般般
   */
   var deepGet = function (obj, path) {
     var length = path.length;
@@ -625,7 +629,7 @@
 
   // Convenience version of a common use case of `map`: fetching a property.
   /* 
-    以为数组的形式返回对象数组中指定某属性值
+    以为数组的形式返回对象数组中指定某种属性值，不能萃取多个
   */
   _.pluck = function (obj, key) {
     /* 
@@ -719,6 +723,12 @@
   };
 
   // Shuffle a collection.
+  /* 
+    数组乱序方法
+
+    const arrayOrder = array => array.sort(() => Math.random() - 1))
+
+  */
   _.shuffle = function (obj) {
     return _.sample(obj, Infinity);
   };
@@ -727,16 +737,27 @@
   // [Fisher-Yates shuffle](https://en.wikipedia.org/wiki/Fisher–Yates_shuffle).
   // If **n** is not specified, returns a single random element.
   // The internal `guard` argument allows it to work with `map`.
+  /* 
+    从 list 中产生一个随机样本。传递一个数字表示从list中返回n个随机元素。否则将返回一个单一的随机项。
+  
+  */
   _.sample = function (obj, n, guard) {
+    /* 
+      如果没有传 n, 最后调用 _.random 方法返回随机的一个数
+    */
     if (n == null || guard) {
       if (!isArrayLike(obj)) obj = _.values(obj);
       return obj[_.random(obj.length - 1)];
     }
+    // 对普通对象、数组
     var sample = isArrayLike(obj) ? _.clone(obj) : _.values(obj);
     var length = getLength(sample);
     n = Math.max(Math.min(n, length), 0);
     var last = length - 1;
     for (var index = 0; index < n; index++) {
+      /* 
+        拿前 n 个值填补空位
+      */
       var rand = _.random(index, last);
       var temp = sample[index];
       sample[index] = sample[rand];
@@ -845,6 +866,9 @@
   // Return the number of elements in an object.
   /* 
     返回集合、数组的长度或对象的 key 的个数
+
+    数组或类数组 => array.length
+    对象 => keys(object).length
   */
   _.size = function (obj) {
     if (obj == null) return 0;
@@ -1759,6 +1783,12 @@
   });
 
   // Return a copy of the object without the blacklisted properties.
+
+  /* 
+    返回一个object副本，只过滤出除去keys(有效的键组成的数组)参数指定的属性值。 或者接受一个判断函数，指定忽略哪个key。
+  
+    可以传字符串或函数
+  */
   _.omit = restArguments(function (obj, keys) {
     var iteratee = keys[0],
       context;
@@ -2115,6 +2145,23 @@
 
   // Run Underscore.js in *noConflict* mode, returning the `_` variable to its
   // previous owner. Returns a reference to the Underscore object.
+  /* 
+    在浏览器中，var 声明的变量会成为 window 对象的属性，noConflict 方法可以解决此冲突
+
+      index.html
+
+      <script>
+        var _ = 'in browser';
+      </script>
+      <script src="https://www.underscore.js"></script>
+      <script>
+
+        var underscore = _.noConflict();
+        console.log(underscore.each);
+
+      </script>
+  
+  */
   _.noConflict = function () {
     root._ = previousUnderscore;
     return this;
@@ -2213,7 +2260,7 @@
 
   // Run a function **n** times.
   /* 
-    没搞清楚有什么作用？
+    没搞清楚这个方法有什么作用？
   */
   _.times = function (n, iteratee, context) {
     var accum = Array(Math.max(0, n));
@@ -2278,6 +2325,10 @@
   // Traverses the children of `obj` along `path`. If a child is a function, it
   // is invoked with its parent as context. Returns the value of the final
   // child, or `fallback` if any child is undefined.
+  /* 
+    如果对象 object 中的属性 property 是函数, 则调用它, 否则, 返回它。
+    感觉没什么用处
+  */
   _.result = function (obj, path, fallback) {
     if (!_.isArray(path)) path = [path];
     var length = path.length;
@@ -2525,6 +2576,8 @@
   /* 
     为 _.prototype 对象增加 value 属性，值为传入的 obj 参数
     获取封装对象的最终值
+
+    _({name: 'qin'}) => {name: 'qin'}
   */
   _.prototype.value = function () {
     return this._wrapped;
