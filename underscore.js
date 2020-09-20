@@ -25,6 +25,7 @@
 
   方法分类:
   1. 集合方法
+  each/map/reduce/reduceRight/find/filter/where/fineWhere/reject/every/some/contains/invoke/pluck/max/min/sortBy/groupBy/indexBy/countBy/shuffle/sample/toArray/size/partition
   2. 数组方法
   3. 函数方法
   4. 对象方法
@@ -495,6 +496,7 @@
     */
     var keyFinder = isArrayLike(obj) ? _.findIndex : _.findKey;
     var key = keyFinder(obj, predicate, context);
+    // 只要 key 存在，
     if (key !== void 0 && key !== -1) return obj[key];
   };
 
@@ -606,21 +608,58 @@
   };
 
   // Invoke a method (with arguments) on every item in a collection.
+
+  /* 
+    invoke 函数就是对 obj 对象(一般为数组)遍历，并使用 methodName 字符串表示的方法，返回结果
+
+    const studentGroup = [{
+        name:'kk',
+        age:55,
+        school:'good',
+        family: { mom:'hh',brother:'ii' }
+    },{
+        name:'gg',
+        addr:'babala',
+        family: { father:'oo',mom:'tt' }
+    }];
+
+    // 学生信息对象中是否存在name属性
+    _.invoke(studentGroup,'hasOwnProperty','name')
+    => [true, true]
+
+    // 学生信息对象中的family对象是否存在brother属性
+    _.invoke(studentGroup,['family','hasOwnProperty'],'brother')
+    => [true, false]
+
+    // 获取每个学生的名字
+    _.invoke(studentGroup,function(){return this.name})
+    => ["kk", "gg"]
+
+  */
   _.invoke = restArguments(function (obj, path, args) {
     var contextPath, func;
+
+    /* 
+      第二个参数支持函数、数组和字符串
+    */
     if (_.isFunction(path)) {
       func = path;
     } else if (_.isArray(path)) {
       contextPath = path.slice(0, -1);
+      // hasOwnProperty
       path = path[path.length - 1];
     }
+
+    // 使用了 map, 返回结果的结果形式一定是数组形式
     return _.map(obj, function (context) {
+      // context 是每一项
       var method = func;
       if (!method) {
         if (contextPath && contextPath.length) {
           context = deepGet(context, contextPath);
         }
         if (context == null) return void 0;
+        // 提取方法
         method = context[path];
       }
       return method == null ? method : method.apply(context, args);
@@ -668,13 +707,14 @@
     ) {
       obj = isArrayLike(obj) ? obj : _.values(obj);
       for (var i = 0, length = obj.length; i < length; i++) {
-        value = obj[i];
+        value = obj[i]; 
         if (value != null && value > result) {
           result = value;
         }
       }
     } else {
       iteratee = cb(iteratee, context);
+      // 用 for 循环对每一项操作
       _.each(obj, function (v, index, list) {
         computed = iteratee(v, index, list);
         if (
